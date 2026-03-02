@@ -27,6 +27,7 @@ public class GrassFootstepNoise : MonoBehaviour
     [Header("Ground Check")]
     [SerializeField] private float groundCheckDistance = 0.08f;
     [SerializeField] private LayerMask groundMask = ~0;
+    [SerializeField] private bool lockVerticalInput;
 
     private AudioSource source;
     private AudioClip driverClip;
@@ -82,6 +83,11 @@ public class GrassFootstepNoise : MonoBehaviour
 
         float x = Input.GetAxisRaw("Horizontal");
         float y = Input.GetAxisRaw("Vertical");
+        if (lockVerticalInput)
+        {
+            y = 0f;
+        }
+
         bool isMoving = (x * x + y * y) > 0.001f;
         bool isRunning = isMoving && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
@@ -232,5 +238,20 @@ public class GrassFootstepNoise : MonoBehaviour
         {
             pitchMax = pitchMin;
         }
+    }
+
+    public void SetVerticalInputLocked(bool isLocked)
+    {
+        lockVerticalInput = isLocked;
+    }
+
+    public float GetMasterVolume()
+    {
+        return masterVolume;
+    }
+
+    public void SetMasterVolume(float value)
+    {
+        masterVolume = Mathf.Clamp01(value);
     }
 }

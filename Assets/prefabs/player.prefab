@@ -336,7 +336,6 @@ GameObject:
   - component: {fileID: 2474567029283803119}
   - component: {fileID: 1770975860809863439}
   - component: {fileID: 6276966918451570662}
-  - component: {fileID: 2618071871830970628}
   m_Layer: 0
   m_Name: player
   m_TagString: Untagged
@@ -427,6 +426,7 @@ MonoBehaviour:
   useXZPlane: 1
   rightScaleX: -0.05
   leftScaleX: 0.05
+  lockVerticalInput: 0
   targetRenderer: {fileID: 5525037195942565146}
   visualTransform: {fileID: 3437840856914527469}
   animationFps: 10
@@ -582,6 +582,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  lockVerticalInput: 0
 --- !u!82 &6276966918451570662
 AudioSource:
   m_ObjectHideFlags: 0
@@ -679,30 +680,3 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &2618071871830970628
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6281375617192678428}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b6b7a3d51024ea4bb987c817769fab0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GrassFootstepNoise
-  walkStepInterval: 0.25
-  runStepInterval: 0.2
-  attackTime: 0.01
-  decayTime: 0.14
-  cutoffBaseHz: 600
-  cutoffRandomHz: 450
-  masterVolume: 1
-  stepVolume: 0.085
-  volumeRandom: 0.03
-  pitchMin: 0.92
-  pitchMax: 1.08
-  groundCheckDistance: 0.08
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 4294967295

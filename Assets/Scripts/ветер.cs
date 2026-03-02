@@ -137,4 +137,14 @@ public class WindNoiseGenerator : MonoBehaviour
         rngState ^= rngState << 5;
         return (rngState / 4294967295f) * 2f - 1f;
     }
+
+    public float GetMasterVolume()
+    {
+        return masterVolume;
+    }
+
+    public void SetMasterVolume(float value)
+    {
+        masterVolume = Mathf.Clamp01(value);
+    }
 }

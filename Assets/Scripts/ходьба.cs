@@ -7,6 +7,7 @@ public class PlayerWASDAnimator : MonoBehaviour
     [SerializeField] private bool useXZPlane = true;
     [SerializeField] private float rightScaleX = 0.05f;
     [SerializeField] private float leftScaleX = -0.05f;
+    [SerializeField] private bool lockVerticalInput;
 
     [Header("Render Target")]
     [SerializeField] private Renderer targetRenderer;
@@ -39,6 +40,7 @@ public class PlayerWASDAnimator : MonoBehaviour
     private bool cachedIsRunning;
     private bool cachedJumpPressed;
     private bool isGrounded;
+    private bool inputEnabled = true;
 
     private enum AnimState
     {
@@ -93,7 +95,22 @@ public class PlayerWASDAnimator : MonoBehaviour
 
     private void Update()
     {
+        if (!inputEnabled)
+        {
+            cachedInput = Vector2.zero;
+            cachedIsRunning = false;
+            cachedJumpPressed = false;
+            UpdateAnimationState(false, false, isGrounded);
+            TickAnimation();
+            return;
+        }
+
         cachedInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        if (lockVerticalInput)
+        {
+            cachedInput.y = 0f;
+        }
+
         bool isMoving = cachedInput.sqrMagnitude > 0.001f;
         cachedIsRunning = isMoving && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
@@ -359,5 +376,21 @@ public class PlayerWASDAnimator : MonoBehaviour
     private void Start()
     {
         ApplyCurrentFrame();
+    }
+
+    public void SetVerticalInputLocked(bool isLocked)
+    {
+        lockVerticalInput = isLocked;
+    }
+
+    public void SetInputEnabled(bool enabled)
+    {
+        inputEnabled = enabled;
+        if (!inputEnabled)
+        {
+            cachedInput = Vector2.zero;
+            cachedIsRunning = false;
+            cachedJumpPressed = false;
+        }
     }
 }
