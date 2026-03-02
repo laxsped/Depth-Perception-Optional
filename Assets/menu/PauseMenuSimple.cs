@@ -15,6 +15,7 @@ public class PauseMenuSimple : MonoBehaviour
     [SerializeField] private Color overlayColor = new Color(0f, 0f, 0f, 0.42f);
     [SerializeField] private int fontSize = 42;
     [SerializeField] private float buttonSpacing = 70f;
+    [SerializeField] private float buttonsLeftOffset = 120f;
 
     [Header("Optional Font")]
     [SerializeField] private Font customFont;
@@ -22,8 +23,10 @@ public class PauseMenuSimple : MonoBehaviour
     private Canvas canvas;
     private Image overlay;
     private Button resumeButton;
+    private Button settingsButton;
     private Button quitButton;
     private Text resumeLabel;
+    private Text settingsLabel;
     private Text quitLabel;
     private bool isOpen;
 
@@ -103,13 +106,16 @@ public class PauseMenuSimple : MonoBehaviour
         overlayRect.offsetMin = Vector2.zero;
         overlayRect.offsetMax = Vector2.zero;
 
-        resumeButton = CreateTextButton("Resume Button", "вернуться", font, new Vector2(0f, buttonSpacing * 0.5f), out resumeLabel);
-        quitButton = CreateTextButton("Quit Button", "уйти", font, new Vector2(0f, -buttonSpacing * 0.5f), out quitLabel);
+        resumeButton = CreateTextButton("Resume Button", "вернуться", font, new Vector2(buttonsLeftOffset, buttonSpacing), out resumeLabel);
+        settingsButton = CreateTextButton("Settings Button", "настройки", font, new Vector2(buttonsLeftOffset, 0f), out settingsLabel);
+        quitButton = CreateTextButton("Quit Button", "уйти", font, new Vector2(buttonsLeftOffset, -buttonSpacing), out quitLabel);
 
         resumeButton.onClick.AddListener(Resume);
+        settingsButton.onClick.AddListener(OpenSettingsStub);
         quitButton.onClick.AddListener(Quit);
 
         AddHoverQuestionMark(resumeButton.gameObject, resumeLabel, "вернуться");
+        AddHoverQuestionMark(settingsButton.gameObject, settingsLabel, "настройки");
         AddHoverQuestionMark(quitButton.gameObject, quitLabel, "уйти");
     }
 
@@ -119,10 +125,10 @@ public class PauseMenuSimple : MonoBehaviour
         buttonGo.transform.SetParent(overlay.transform, false);
 
         RectTransform rect = buttonGo.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(500f, 56f);
+        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMax = new Vector2(0f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.sizeDelta = new Vector2(560f, 56f);
         rect.anchoredPosition = anchoredPosition;
 
         Image bg = buttonGo.GetComponent<Image>();
@@ -136,18 +142,24 @@ public class PauseMenuSimple : MonoBehaviour
         RectTransform tr = textGo.GetComponent<RectTransform>();
         tr.anchorMin = Vector2.zero;
         tr.anchorMax = Vector2.one;
-        tr.offsetMin = Vector2.zero;
+        tr.offsetMin = new Vector2(24f, 0f);
         tr.offsetMax = Vector2.zero;
 
         label = textGo.GetComponent<Text>();
         label.text = text;
         label.font = font;
         label.fontSize = fontSize;
-        label.alignment = TextAnchor.MiddleCenter;
+        // Horizontal center block, but text is left-aligned inside it.
+        label.alignment = TextAnchor.MiddleLeft;
         label.color = Color.white;
         label.raycastTarget = false;
 
         return btn;
+    }
+
+    private void OpenSettingsStub()
+    {
+        // Placeholder for upcoming settings page.
     }
 
     private static void AddHoverQuestionMark(GameObject go, Text targetLabel, string baseText)
