@@ -73,3 +73,9 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Это нельзя показывать в репозитории (лицензия)
+/[Aa]ssets\[Dd]reamTree2/
+
+/Assets/DreamTree2
+Assets/DreamTree2.meta
