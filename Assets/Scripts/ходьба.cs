@@ -17,7 +17,13 @@ public class PlayerWASDAnimator : MonoBehaviour
     [SerializeField] private DirectionalFrames idleDirectionalFrames;
     [SerializeField] private DirectionalFrames walkDirectionalFrames;
     [SerializeField] private DirectionalFrames runDirectionalFrames;
+    [SerializeField] private DirectionalFrames jumpDirectionalFrames;
     [SerializeField] private float runSpeedMultiplier = 1.8f;
+
+    [Header("Jump")]
+    [SerializeField] private float jumpForce = 4.5f;
+    [SerializeField] private float groundCheckDistance = 0.08f;
+    [SerializeField] private LayerMask groundMask = ~0;
 
     private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
     private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
@@ -26,16 +32,20 @@ public class PlayerWASDAnimator : MonoBehaviour
 
     private Material runtimeMaterial;
     private Rigidbody rb;
+    private Collider bodyCollider;
     private float frameTimer;
     private int frameIndex;
     private Vector2 cachedInput;
     private bool cachedIsRunning;
+    private bool cachedJumpPressed;
+    private bool isGrounded;
 
     private enum AnimState
     {
         Idle,
         Walk,
-        Run
+        Run,
+        Jump
     }
 
     private enum FacingDirection
@@ -78,6 +88,7 @@ public class PlayerWASDAnimator : MonoBehaviour
         }
 
         rb = GetComponent<Rigidbody>();
+        bodyCollider = GetComponent<Collider>();
     }
 
     private void Update()
@@ -85,16 +96,23 @@ public class PlayerWASDAnimator : MonoBehaviour
         cachedInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         bool isMoving = cachedInput.sqrMagnitude > 0.001f;
         cachedIsRunning = isMoving && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            cachedJumpPressed = true;
+        }
 
         UpdateFacingDirection(cachedInput, isMoving);
         UpdateVisualFlip(cachedInput, isMoving);
-        UpdateAnimationState(isMoving, cachedIsRunning);
+        UpdateAnimationState(isMoving, cachedIsRunning, isGrounded);
         TickAnimation();
     }
 
     private void FixedUpdate()
     {
+        RefreshGrounded();
+        TryJump();
         Move(cachedInput, cachedIsRunning);
+        RefreshGrounded();
     }
 
     private void Move(Vector2 input, bool isRunning)
@@ -123,10 +141,14 @@ public class PlayerWASDAnimator : MonoBehaviour
         }
     }
 
-    private void UpdateAnimationState(bool isMoving, bool isRunning)
+    private void UpdateAnimationState(bool isMoving, bool isRunning, bool grounded)
     {
         AnimState nextState = AnimState.Idle;
-        if (isMoving)
+        if (!grounded)
+        {
+            nextState = AnimState.Jump;
+        }
+        else if (isMoving)
         {
             nextState = isRunning ? AnimState.Run : AnimState.Walk;
         }
@@ -218,8 +240,46 @@ public class PlayerWASDAnimator : MonoBehaviour
         {
             directional = runDirectionalFrames;
         }
+        else if (currentState == AnimState.Jump)
+        {
+            directional = jumpDirectionalFrames;
+        }
 
         return GetFramesForDirection(directional, currentDirection);
+    }
+
+    private void TryJump()
+    {
+        if (!cachedJumpPressed || !isGrounded || rb == null)
+        {
+            return;
+        }
+
+        Vector3 v = rb.linearVelocity;
+        v.y = 0f;
+        rb.linearVelocity = v;
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+        cachedJumpPressed = false;
+    }
+
+    private void RefreshGrounded()
+    {
+        Vector3 origin;
+        float castDistance;
+
+        if (bodyCollider != null)
+        {
+            Bounds b = bodyCollider.bounds;
+            origin = b.center;
+            castDistance = b.extents.y + groundCheckDistance;
+        }
+        else
+        {
+            origin = transform.position + Vector3.up * 0.1f;
+            castDistance = 0.6f;
+        }
+
+        isGrounded = Physics.Raycast(origin, Vector3.down, castDistance, groundMask, QueryTriggerInteraction.Ignore);
     }
 
     private static Texture2D[] GetFramesForDirection(DirectionalFrames frames, FacingDirection direction)
@@ -282,6 +342,8 @@ public class PlayerWASDAnimator : MonoBehaviour
         animationFps = Mathf.Max(1f, animationFps);
         moveSpeed = Mathf.Max(0f, moveSpeed);
         runSpeedMultiplier = Mathf.Max(1f, runSpeedMultiplier);
+        jumpForce = Mathf.Max(0f, jumpForce);
+        groundCheckDistance = Mathf.Max(0.001f, groundCheckDistance);
 
         if (Mathf.Abs(rightScaleX) < 0.0001f)
         {

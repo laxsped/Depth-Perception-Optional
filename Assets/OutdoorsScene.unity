@@ -375,6 +375,10 @@ PrefabInstance:
       propertyPath: field of view
       value: 75
       objectReference: {fileID: 0}
+    - target: {fileID: 2474567029283803119, guid: c1125256bf48f6342b12645dd0d788e7, type: 3}
+      propertyPath: jumpForce
+      value: 2.5
+      objectReference: {fileID: 0}
     - target: {fileID: 5967650126076098792, guid: c1125256bf48f6342b12645dd0d788e7, type: 3}
       propertyPath: antialiasing
       value: 0

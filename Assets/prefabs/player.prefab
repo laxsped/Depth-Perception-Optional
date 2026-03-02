@@ -515,4 +515,40 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 4ff07e68f357a714e91567067d336829, type: 3}
     - {fileID: 2800000, guid: 0f3913bf7f363e74a90d769e8ee7e4d5, type: 3}
     - {fileID: 2800000, guid: e65f135ea931fad49bbd9eacd02789c6, type: 3}
+  jumpDirectionalFrames:
+    front:
+    - {fileID: 2800000, guid: 9d44a82bf7d79384ebdbeb246f6c7c03, type: 3}
+    - {fileID: 2800000, guid: cc975cbb656b16148ac2b9cc62203ec2, type: 3}
+    - {fileID: 2800000, guid: 7927b7a750a25de4fa01e6deae963316, type: 3}
+    - {fileID: 2800000, guid: ad009ed2970a2fe4485c4f78152c890f, type: 3}
+    - {fileID: 2800000, guid: 20f5ac1ca5c98a743bb6585e5dc5b16d, type: 3}
+    frontSide:
+    - {fileID: 2800000, guid: bbe84eb454703f34f874daa6642e437f, type: 3}
+    - {fileID: 2800000, guid: dc8c64efff699074494768ad589108b1, type: 3}
+    - {fileID: 2800000, guid: 73a73ae8a49ce5745bd07756ab66dcae, type: 3}
+    - {fileID: 2800000, guid: d8746f7710169484aa482050b83386c7, type: 3}
+    - {fileID: 2800000, guid: ea12679998a574c4aa74ceed7d94b35c, type: 3}
+    side:
+    - {fileID: 2800000, guid: 22e9a2deb9cb2c747acda7348691caa1, type: 3}
+    - {fileID: 2800000, guid: e74832ccdd10d29458ecdbe57cf202cb, type: 3}
+    - {fileID: 2800000, guid: 9751ec57f2b2e5048905e618af95dd8e, type: 3}
+    - {fileID: 2800000, guid: f83f9cf9f4de0dd4187bddb3192a5ac4, type: 3}
+    - {fileID: 2800000, guid: 0e04b296bf03688438490d4d76aa26a7, type: 3}
+    backSide:
+    - {fileID: 2800000, guid: 385a6ae702391b84c8136ca9e55e33c1, type: 3}
+    - {fileID: 2800000, guid: bb4b87420aef90a4f8025b2c1e959af9, type: 3}
+    - {fileID: 2800000, guid: eaa3219b85f04e6479282386818e114a, type: 3}
+    - {fileID: 2800000, guid: d5339d091451c954d9a4a0bdb0bcc495, type: 3}
+    - {fileID: 2800000, guid: 4523de61851ae0548980fefe4b56d64a, type: 3}
+    back:
+    - {fileID: 2800000, guid: 5fcb8363499452a4fae985beb031d09c, type: 3}
+    - {fileID: 2800000, guid: d6a9e48a23e9e6747af1950c96960069, type: 3}
+    - {fileID: 2800000, guid: f0140b81af598ca43bc469a07fdfdd4b, type: 3}
+    - {fileID: 2800000, guid: 912538d6361c2274dbacf0ce5d15ffbb, type: 3}
+    - {fileID: 2800000, guid: 71e8e712fb6e45542937b377e8b845e4, type: 3}
   runSpeedMultiplier: 1.8
+  jumpForce: 4.5
+  groundCheckDistance: 0.08
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
