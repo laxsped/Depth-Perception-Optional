@@ -75,6 +75,8 @@ public class PlayerWASDAnimator : MonoBehaviour
 
     private void Awake()
     {
+        GameInputBindings.EnsureLoaded();
+
         if (targetRenderer == null)
         {
             targetRenderer = GetComponentInChildren<Renderer>();
@@ -105,15 +107,15 @@ public class PlayerWASDAnimator : MonoBehaviour
             return;
         }
 
-        cachedInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        cachedInput = ReadMovementInput();
         if (lockVerticalInput)
         {
             cachedInput.y = 0f;
         }
 
         bool isMoving = cachedInput.sqrMagnitude > 0.001f;
-        cachedIsRunning = isMoving && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        cachedIsRunning = isMoving && Input.GetKey(GameInputBindings.RunKey);
+        if (Input.GetKeyDown(GameInputBindings.JumpKey) && isGrounded)
         {
             cachedJumpPressed = true;
         }
@@ -392,5 +394,30 @@ public class PlayerWASDAnimator : MonoBehaviour
             cachedIsRunning = false;
             cachedJumpPressed = false;
         }
+    }
+
+    private static Vector2 ReadMovementInput()
+    {
+        float x = 0f;
+        float y = 0f;
+
+        if (Input.GetKey(GameInputBindings.LeftKey))
+        {
+            x -= 1f;
+        }
+        if (Input.GetKey(GameInputBindings.RightKey))
+        {
+            x += 1f;
+        }
+        if (Input.GetKey(GameInputBindings.ForwardKey))
+        {
+            y += 1f;
+        }
+        if (Input.GetKey(GameInputBindings.BackwardKey))
+        {
+            y -= 1f;
+        }
+
+        return new Vector2(x, y);
     }
 }

@@ -43,6 +43,8 @@ public class WindNoiseGenerator : MonoBehaviour
 
     private void Awake()
     {
+        GameInputBindings.EnsureLoaded();
+
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = true;
@@ -121,10 +123,27 @@ public class WindNoiseGenerator : MonoBehaviour
 
     private void Update()
     {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-        bool isMoving = (horizontal * horizontal + vertical * vertical) > 0.001f;
-        bool isRunning = isMoving && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+        float x = 0f;
+        float y = 0f;
+        if (Input.GetKey(GameInputBindings.LeftKey))
+        {
+            x -= 1f;
+        }
+        if (Input.GetKey(GameInputBindings.RightKey))
+        {
+            x += 1f;
+        }
+        if (Input.GetKey(GameInputBindings.ForwardKey))
+        {
+            y += 1f;
+        }
+        if (Input.GetKey(GameInputBindings.BackwardKey))
+        {
+            y -= 1f;
+        }
+
+        bool isMoving = (x * x + y * y) > 0.001f;
+        bool isRunning = isMoving && Input.GetKey(GameInputBindings.RunKey);
         float target = isRunning ? runVolumeMultiplier : 1f;
         runtimeVolumeMultiplier = Mathf.Lerp(runtimeVolumeMultiplier, target, Time.unscaledDeltaTime * runVolumeSmoothing);
     }

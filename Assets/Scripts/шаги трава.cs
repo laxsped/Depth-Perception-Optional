@@ -54,6 +54,8 @@ public class GrassFootstepNoise : MonoBehaviour
 
     private void Awake()
     {
+        GameInputBindings.EnsureLoaded();
+
         source = GetComponent<AudioSource>();
         bodyCollider = GetComponent<Collider>();
 
@@ -81,15 +83,32 @@ public class GrassFootstepNoise : MonoBehaviour
     {
         RefreshGrounded();
 
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
+        float x = 0f;
+        float y = 0f;
+        if (Input.GetKey(GameInputBindings.LeftKey))
+        {
+            x -= 1f;
+        }
+        if (Input.GetKey(GameInputBindings.RightKey))
+        {
+            x += 1f;
+        }
+        if (Input.GetKey(GameInputBindings.ForwardKey))
+        {
+            y += 1f;
+        }
+        if (Input.GetKey(GameInputBindings.BackwardKey))
+        {
+            y -= 1f;
+        }
+
         if (lockVerticalInput)
         {
             y = 0f;
         }
 
         bool isMoving = (x * x + y * y) > 0.001f;
-        bool isRunning = isMoving && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+        bool isRunning = isMoving && Input.GetKey(GameInputBindings.RunKey);
 
         if (!isMoving || !isGrounded)
         {
