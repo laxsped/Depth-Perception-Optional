@@ -18,10 +18,23 @@ public class CameraTriggerZone : MonoBehaviour
     public bool smoothMove = false;
     public float duration = 1f;
 
+    [Header("Audio")]
+    public bool playAudio = false;
+    public AudioSource audioSource;
+    public AudioClip audioClip;
+
+    [Header("Audio Fade In")]
+    public bool fadeIn = false;
+    public float fadeDuration = 1f;
+    public float targetVolume = 1f;
+
     private Vector3 startPosition;
     private Vector3 targetPosition;
     private float elapsed = 0f;
     private bool isMoving = false;
+
+    private float fadeElapsed = 0f;
+    private bool isFading = false;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -39,25 +52,56 @@ public class CameraTriggerZone : MonoBehaviour
         if (smoothMove)
         {
             startPosition = cameraTransform.localPosition;
-            elapsed = 0f; // ← сбрасываем таймер, даже если анимация уже шла
+            elapsed = 0f;
             isMoving = true;
         }
         else
         {
             cameraTransform.localPosition = targetPosition;
         }
+
+        // ── Аудио ──────────────────────────────────────────────────────────────
+        if (playAudio && audioSource != null && audioClip != null)
+        {
+            if (fadeIn)
+            {
+                audioSource.volume = 0f;
+                audioSource.clip = audioClip;
+                audioSource.Play();
+                fadeElapsed = 0f;
+                isFading = true;
+            }
+            else
+            {
+                audioSource.PlayOneShot(audioClip);
+            }
+        }
     }
 
     private void Update()
     {
-        if (!isMoving || cameraTransform == null) return;
+        // ── Движение камеры ────────────────────────────────────────────────────
+        if (isMoving && cameraTransform != null)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
 
-        elapsed += Time.deltaTime;
-        float t = Mathf.Clamp01(elapsed / duration);
+            cameraTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, t);
 
-        cameraTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, t);
+            if (t >= 1f)
+                isMoving = false;
+        }
 
-        if (t >= 1f)
-            isMoving = false;
+        // ── Fade In громкости ──────────────────────────────────────────────────
+        if (isFading && audioSource != null)
+        {
+            fadeElapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(fadeElapsed / fadeDuration);
+
+            audioSource.volume = Mathf.Lerp(0f, targetVolume, t);
+
+            if (t >= 1f)
+                isFading = false;
+        }
     }
 }
