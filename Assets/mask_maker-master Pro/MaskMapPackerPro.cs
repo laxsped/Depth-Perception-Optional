@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System.IO;
@@ -661,3 +662,6 @@ public class MaskMapPackerPro : EditorWindow
 
     private void SetStatus(string msg, MessageType type) { statusMsg = msg; statusType = type; }
 }
+#endif
+
+

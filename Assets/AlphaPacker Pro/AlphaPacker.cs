@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System.IO;
@@ -430,3 +431,7 @@ public class AlphaPacker : EditorWindow
 
     private void SetStatus(string msg, MessageType type) { statusMsg = msg; statusType = type; }
 }
+
+#endif
+
+
