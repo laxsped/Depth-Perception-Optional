@@ -15,6 +15,7 @@ public static class GameInputBindings
 {
     private const string PrefPrefix = "InputBinding.";
     private static bool loaded;
+    public static bool RunLocked { get; set; }
 
     public static KeyCode ForwardKey { get; private set; } = KeyCode.W;
     public static KeyCode BackwardKey { get; private set; } = KeyCode.S;

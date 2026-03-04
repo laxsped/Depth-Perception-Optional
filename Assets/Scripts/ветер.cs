@@ -143,7 +143,7 @@ public class WindNoiseGenerator : MonoBehaviour
         }
 
         bool isMoving = (x * x + y * y) > 0.001f;
-        bool isRunning = isMoving && Input.GetKey(GameInputBindings.RunKey);
+        bool isRunning = isMoving && !GameInputBindings.RunLocked && Input.GetKey(GameInputBindings.RunKey);
         float target = isRunning ? runVolumeMultiplier : 1f;
         runtimeVolumeMultiplier = Mathf.Lerp(runtimeVolumeMultiplier, target, Time.unscaledDeltaTime * runVolumeSmoothing);
     }
@@ -167,3 +167,4 @@ public class WindNoiseGenerator : MonoBehaviour
         masterVolume = Mathf.Clamp01(value);
     }
 }
+

@@ -102,6 +102,7 @@ public class PauseMenuSimple : MonoBehaviour
     private Text menuVolumeRowLabel;
     private Text effectsVolumeRowLabel;
     private Text resolutionRowLabel;
+    private Text windowModeRowLabel;
     private Text fpsRowLabel;
     private Text vsyncRowLabel;
     private Text hdrRowLabel;
@@ -129,6 +130,8 @@ public class PauseMenuSimple : MonoBehaviour
 
     private Button resolutionButton;
     private Text resolutionValueText;
+    private Button windowModeButton;
+    private Text windowModeValueText;
     private Button fpsButton;
     private Text fpsValueText;
     private Button vsyncButton;
@@ -166,6 +169,7 @@ public class PauseMenuSimple : MonoBehaviour
     private int effectsVolumeLevel = 10;
 
     private int resolutionIndex;
+    private int windowModeIndex;
     private int fpsIndex = 1;
     private int vSyncIndex;
     private int hdrIndex = 1;
@@ -182,6 +186,12 @@ public class PauseMenuSimple : MonoBehaviour
     private float ambientBaseIntensity = 1f;
 
     private bool IsEnglish => languageIndex == 0;
+    private static readonly FullScreenMode[] windowModeOptions =
+    {
+        FullScreenMode.ExclusiveFullScreen,
+        FullScreenMode.FullScreenWindow,
+        FullScreenMode.Windowed
+    };
 
     private sealed class KeybindRowUi
     {
@@ -407,6 +417,8 @@ public class PauseMenuSimple : MonoBehaviour
         screenTitleText = CreateHeader(visualSectionRoot, new Vector2(settingsLabelX, yVisual), sectionFont, menuFontSize - 12);
         yVisual -= 58f;
         CreateCycleRow(visualSectionRoot, new Vector2(settingsLabelX, yVisual), itemsFont, OnResolutionPressed, out resolutionRowLabel, out resolutionButton, out resolutionValueText);
+        yVisual -= 52f;
+        CreateCycleRow(visualSectionRoot, new Vector2(settingsLabelX, yVisual), itemsFont, OnWindowModePressed, out windowModeRowLabel, out windowModeButton, out windowModeValueText);
         yVisual -= 52f;
         CreateCycleRow(visualSectionRoot, new Vector2(settingsLabelX, yVisual), itemsFont, OnFpsPressed, out fpsRowLabel, out fpsButton, out fpsValueText);
         yVisual -= 52f;
@@ -891,7 +903,16 @@ public class PauseMenuSimple : MonoBehaviour
 
     private void LoadSettings()
     {
-        languageIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "language", 1), 0, 1);
+        string languageKey = PrefPrefix + "language";
+        if (PlayerPrefs.HasKey(languageKey))
+        {
+            languageIndex = Mathf.Clamp(PlayerPrefs.GetInt(languageKey, 1), 0, 1);
+        }
+        else
+        {
+            languageIndex = Application.systemLanguage == SystemLanguage.Russian ? 1 : 0;
+            PlayerPrefs.SetInt(languageKey, languageIndex);
+        }
         colorBlindIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "color_blind", 0), 0, 3);
 
         masterVolumeLevel = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "volume_master", 10), 0, 10);
@@ -910,6 +931,7 @@ public class PauseMenuSimple : MonoBehaviour
             }
         }
 
+        windowModeIndex = FindWindowModeIndex((FullScreenMode)PlayerPrefs.GetInt(PrefPrefix + "window_mode", (int)Screen.fullScreenMode));
         fpsIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "fps_index", fpsIndex), 0, fpsOptions.Length - 1);
         vSyncIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "vsync", QualitySettings.vSyncCount > 0 ? 1 : 0), 0, 1);
         hdrIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "hdr", 1), 0, 1);
@@ -927,6 +949,7 @@ public class PauseMenuSimple : MonoBehaviour
         ApplyEffectsVolume();
 
         ApplyGraphicsQuality();
+        ApplyWindowMode();
         ApplyResolution();
         ApplyFpsLimit();
         ApplyVsync();
@@ -954,6 +977,7 @@ public class PauseMenuSimple : MonoBehaviour
         SetTextSafe(languageValueText, languageIndex == 0 ? "english" : "русский");
         SetTextSafe(colorBlindValueText, GetColorBlindLabel());
         SetTextSafe(resolutionValueText, ResolutionLabel());
+        SetTextSafe(windowModeValueText, GetWindowModeLabel());
         SetTextSafe(fpsValueText, fpsOptions[fpsIndex] < 0 ? (IsEnglish ? "unlimited" : "безлимит") : fpsOptions[fpsIndex].ToString());
         SetTextSafe(vsyncValueText, vSyncIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
         SetTextSafe(hdrValueText, hdrIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
@@ -989,6 +1013,7 @@ public class PauseMenuSimple : MonoBehaviour
             SetTextSafe(menuVolumeRowLabel, "menu volume");
             SetTextSafe(effectsVolumeRowLabel, "effects volume");
             SetTextSafe(resolutionRowLabel, "resolution");
+            SetTextSafe(windowModeRowLabel, "window mode");
             SetTextSafe(fpsRowLabel, "fps limit");
             SetTextSafe(vsyncRowLabel, "vsync");
             SetTextSafe(hdrRowLabel, "hdr");
@@ -1022,6 +1047,7 @@ public class PauseMenuSimple : MonoBehaviour
             SetTextSafe(menuVolumeRowLabel, "громкость меню");
             SetTextSafe(effectsVolumeRowLabel, "громкость эффектов");
             SetTextSafe(resolutionRowLabel, "разрешение");
+            SetTextSafe(windowModeRowLabel, "режим окна");
             SetTextSafe(fpsRowLabel, "ограничение фпс");
             SetTextSafe(vsyncRowLabel, "vsync");
             SetTextSafe(hdrRowLabel, "hdr");
@@ -1032,6 +1058,7 @@ public class PauseMenuSimple : MonoBehaviour
 
         SetTextSafe(languageValueText, languageIndex == 0 ? "english" : "русский");
         SetTextSafe(colorBlindValueText, GetColorBlindLabel());
+        SetTextSafe(windowModeValueText, GetWindowModeLabel());
         SetTextSafe(fpsValueText, fpsOptions[fpsIndex] < 0 ? (IsEnglish ? "unlimited" : "безлимит") : fpsOptions[fpsIndex].ToString());
         SetTextSafe(vsyncValueText, vSyncIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
         SetTextSafe(hdrValueText, hdrIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
@@ -1532,6 +1559,14 @@ public class PauseMenuSimple : MonoBehaviour
         SetTextSafe(resolutionValueText, ResolutionLabel());
     }
 
+    private void OnWindowModePressed()
+    {
+        windowModeIndex = (windowModeIndex + 1) % windowModeOptions.Length;
+        PlayerPrefs.SetInt(PrefPrefix + "window_mode", (int)windowModeOptions[windowModeIndex]);
+        ApplyWindowMode();
+        SetTextSafe(windowModeValueText, GetWindowModeLabel());
+    }
+
     private void OnFpsPressed()
     {
         fpsIndex = (fpsIndex + 1) % fpsOptions.Length;
@@ -1581,6 +1616,23 @@ public class PauseMenuSimple : MonoBehaviour
 
         Vector2Int res = availableResolutions[Mathf.Clamp(resolutionIndex, 0, availableResolutions.Count - 1)];
         Screen.SetResolution(res.x, res.y, Screen.fullScreenMode);
+    }
+
+    private void ApplyWindowMode()
+    {
+        windowModeIndex = Mathf.Clamp(windowModeIndex, 0, windowModeOptions.Length - 1);
+        FullScreenMode mode = windowModeOptions[windowModeIndex];
+        int width = Screen.width;
+        int height = Screen.height;
+
+        if (availableResolutions.Count > 0)
+        {
+            Vector2Int res = availableResolutions[Mathf.Clamp(resolutionIndex, 0, availableResolutions.Count - 1)];
+            width = res.x;
+            height = res.y;
+        }
+
+        Screen.SetResolution(width, height, mode);
     }
 
     private void ApplyFpsLimit()
@@ -1640,6 +1692,42 @@ public class PauseMenuSimple : MonoBehaviour
 
         Vector2Int r = availableResolutions[Mathf.Clamp(resolutionIndex, 0, availableResolutions.Count - 1)];
         return r.x + "x" + r.y;
+    }
+
+    private string GetWindowModeLabel()
+    {
+        FullScreenMode mode = windowModeOptions[Mathf.Clamp(windowModeIndex, 0, windowModeOptions.Length - 1)];
+        if (IsEnglish)
+        {
+            switch (mode)
+            {
+                case FullScreenMode.ExclusiveFullScreen: return "fullscreen";
+                case FullScreenMode.FullScreenWindow: return "borderless";
+                case FullScreenMode.Windowed: return "windowed";
+                default: return mode.ToString().ToLowerInvariant();
+            }
+        }
+
+        switch (mode)
+        {
+            case FullScreenMode.ExclusiveFullScreen: return "полноэкранный";
+            case FullScreenMode.FullScreenWindow: return "без рамки";
+            case FullScreenMode.Windowed: return "оконный";
+            default: return mode.ToString().ToLowerInvariant();
+        }
+    }
+
+    private static int FindWindowModeIndex(FullScreenMode mode)
+    {
+        for (int i = 0; i < windowModeOptions.Length; i++)
+        {
+            if (windowModeOptions[i] == mode)
+            {
+                return i;
+            }
+        }
+
+        return 1;
     }
 
     private static HoverQuestionSuffix AddHoverQuestionMark(GameObject go, Text targetLabel)

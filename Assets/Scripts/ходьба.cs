@@ -114,7 +114,7 @@ public class PlayerWASDAnimator : MonoBehaviour
         }
 
         bool isMoving = cachedInput.sqrMagnitude > 0.001f;
-        cachedIsRunning = isMoving && Input.GetKey(GameInputBindings.RunKey);
+        cachedIsRunning = isMoving && !GameInputBindings.RunLocked && Input.GetKey(GameInputBindings.RunKey);
         if (Input.GetKeyDown(GameInputBindings.JumpKey) && isGrounded)
         {
             cachedJumpPressed = true;
@@ -421,3 +421,4 @@ public class PlayerWASDAnimator : MonoBehaviour
         return new Vector2(x, y);
     }
 }
+

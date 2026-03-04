@@ -108,7 +108,7 @@ public class GrassFootstepNoise : MonoBehaviour
         }
 
         bool isMoving = (x * x + y * y) > 0.001f;
-        bool isRunning = isMoving && Input.GetKey(GameInputBindings.RunKey);
+        bool isRunning = isMoving && !GameInputBindings.RunLocked && Input.GetKey(GameInputBindings.RunKey);
 
         if (!isMoving || !isGrounded)
         {
@@ -274,3 +274,4 @@ public class GrassFootstepNoise : MonoBehaviour
         masterVolume = Mathf.Clamp01(value);
     }
 }
+
