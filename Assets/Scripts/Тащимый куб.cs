@@ -295,6 +295,22 @@ public class ТащимыйКуб : MonoBehaviour
         SetPromptVisible(false);
     }
 
+    private void OnDisable()
+    {
+        // Safety cleanup in case object gets disabled mid-drag.
+        StopDragging();
+        игрок = null;
+        rbИгрока = null;
+        игрокРядом = false;
+        игрокВнутриТриггера = false;
+        блокПовторногоЗахватаДоОтпуска = false;
+    }
+
+    private void OnDestroy()
+    {
+        StopDragging();
+    }
+
     private void StopDragging()
     {
         if (аниматорИгрока != null)
@@ -522,6 +538,9 @@ public class ТащимыйКуб : MonoBehaviour
         минимумСкоростиДляЗвука = Mathf.Clamp(минимумСкоростиДляЗвука, 0.01f, 2f);
         дистанцияДоИгрока = Mathf.Clamp(дистанцияДоИгрока, 0.6f, 2.5f);
         максДистанцияРазрыва = Mathf.Max(1.1f, максДистанцияРазрыва);
+        базоваяМаксСкорость = Mathf.Max(0.1f, базоваяМаксСкорость);
+        базовоеУскорениеТяги = Mathf.Max(0.1f, базовоеУскорениеТяги);
+        множительБега = Mathf.Max(1f, множительБега);
         debugInterval = Mathf.Clamp(debugInterval, 0.05f, 2f);
         демпферВращения = Mathf.Clamp(демпферВращения, 0f, 60f);
     }
