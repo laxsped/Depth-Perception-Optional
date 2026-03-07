@@ -112,6 +112,7 @@ public class PauseMenuSimple : MonoBehaviour
     private Text brightnessRowLabel;
     private Text contrastRowLabel;
     private Text qualityRowLabel;
+    private Text dynamicShadowsRowLabel;
     private Text characterLightingRowLabel;
 
     private readonly Dictionary<BindingAction, KeybindRowUi> keybindRows = new Dictionary<BindingAction, KeybindRowUi>();
@@ -144,6 +145,8 @@ public class PauseMenuSimple : MonoBehaviour
     private Text hdrValueText;
     private Button qualityButton;
     private Text qualityValueText;
+    private Button dynamicShadowsButton;
+    private Text dynamicShadowsValueText;
     private Button characterLightingButton;
     private Text characterLightingValueText;
 
@@ -186,6 +189,7 @@ public class PauseMenuSimple : MonoBehaviour
     private int fpsIndex = 1;
     private int vSyncIndex;
     private int hdrIndex = 1;
+    private int dynamicShadowsIndex = 1;
     private int graphicsQualityIndex = 1;
     // 0 - classic (unlit), 1 - modern (lit)
     private int characterLightingMode = 0;
@@ -199,6 +203,7 @@ public class PauseMenuSimple : MonoBehaviour
     private float menuBaseVolume = 1f;
     private float effectsBaseVolume = 1f;
     private float ambientBaseIntensity = 1f;
+    private readonly Dictionary<Light, LightShadows> cachedLightShadows = new Dictionary<Light, LightShadows>();
 
     private bool IsEnglish => languageIndex == 0;
     private static readonly FullScreenMode[] windowModeOptions =
@@ -460,6 +465,8 @@ public class PauseMenuSimple : MonoBehaviour
         graphicsTitleText = CreateHeader(visualSectionRoot, new Vector2(settingsLabelX, yVisual), sectionFont, menuFontSize - 12);
         yVisual -= 66f;
         CreateCycleRow(visualSectionRoot, new Vector2(settingsLabelX, yVisual), itemsFont, OnGraphicsQualityPressed, out qualityRowLabel, out qualityButton, out qualityValueText);
+        yVisual -= 60f;
+        CreateCycleRow(visualSectionRoot, new Vector2(settingsLabelX, yVisual), itemsFont, OnDynamicShadowsPressed, out dynamicShadowsRowLabel, out dynamicShadowsButton, out dynamicShadowsValueText);
         yVisual -= 60f;
         CreateCycleRow(visualSectionRoot, new Vector2(settingsLabelX, yVisual), itemsFont, OnCharacterLightingPressed, out characterLightingRowLabel, out characterLightingButton, out characterLightingValueText);
 
@@ -983,6 +990,7 @@ public class PauseMenuSimple : MonoBehaviour
         fpsIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "fps_index", fpsIndex), 0, fpsOptions.Length - 1);
         vSyncIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "vsync", QualitySettings.vSyncCount > 0 ? 1 : 0), 0, 1);
         hdrIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "hdr", 1), 0, 1);
+        dynamicShadowsIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "dynamic_shadows", 1), 0, 1);
         graphicsQualityIndex = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "graphics_quality", 1), 0, 2);
         characterLightingMode = Mathf.Clamp(PlayerPrefs.GetInt(PrefPrefix + "character_lighting", 0), 0, 1);
 
@@ -1004,6 +1012,7 @@ public class PauseMenuSimple : MonoBehaviour
         ApplyFpsLimit();
         ApplyVsync();
         ApplyHdr();
+        ApplyDynamicShadows();
         ApplyVisualSettings();
     }
 
@@ -1031,6 +1040,7 @@ public class PauseMenuSimple : MonoBehaviour
         SetTextSafe(fpsValueText, fpsOptions[fpsIndex] < 0 ? (IsEnglish ? "unlimited" : "безлимит") : fpsOptions[fpsIndex].ToString());
         SetTextSafe(vsyncValueText, vSyncIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
         SetTextSafe(hdrValueText, hdrIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
+        SetTextSafe(dynamicShadowsValueText, dynamicShadowsIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
         SetTextSafe(qualityValueText, GetGraphicsQualityLabel());
         SetTextSafe(characterLightingValueText, GetCharacterLightingLabel());
         RefreshKeybindRows();
@@ -1071,6 +1081,7 @@ public class PauseMenuSimple : MonoBehaviour
             SetTextSafe(brightnessRowLabel, "brightness");
             SetTextSafe(contrastRowLabel, "contrast");
             SetTextSafe(qualityRowLabel, "quality");
+            SetTextSafe(dynamicShadowsRowLabel, "dynamic shadows");
             SetTextSafe(characterLightingRowLabel, "character lighting");
         }
         else
@@ -1106,6 +1117,7 @@ public class PauseMenuSimple : MonoBehaviour
             SetTextSafe(brightnessRowLabel, "яркость");
             SetTextSafe(contrastRowLabel, "контраст");
             SetTextSafe(qualityRowLabel, "качество");
+            SetTextSafe(dynamicShadowsRowLabel, "динамические тени");
             SetTextSafe(characterLightingRowLabel, "освещение персонажа");
         }
 
@@ -1115,6 +1127,7 @@ public class PauseMenuSimple : MonoBehaviour
         SetTextSafe(fpsValueText, fpsOptions[fpsIndex] < 0 ? (IsEnglish ? "unlimited" : "безлимит") : fpsOptions[fpsIndex].ToString());
         SetTextSafe(vsyncValueText, vSyncIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
         SetTextSafe(hdrValueText, hdrIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
+        SetTextSafe(dynamicShadowsValueText, dynamicShadowsIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
         SetTextSafe(qualityValueText, GetGraphicsQualityLabel());
         SetTextSafe(characterLightingValueText, GetCharacterLightingLabel());
         RefreshKeybindRows();
@@ -1894,6 +1907,60 @@ public class PauseMenuSimple : MonoBehaviour
         PlayerPrefs.SetInt(PrefPrefix + "hdr", hdrIndex);
         ApplyHdr();
         SetTextSafe(hdrValueText, hdrIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
+        SetTextSafe(dynamicShadowsValueText, dynamicShadowsIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
+    }
+    private void OnDynamicShadowsPressed()
+    {
+        dynamicShadowsIndex = dynamicShadowsIndex == 0 ? 1 : 0;
+        PlayerPrefs.SetInt(PrefPrefix + "dynamic_shadows", dynamicShadowsIndex);
+        ApplyDynamicShadows();
+        SetTextSafe(dynamicShadowsValueText, dynamicShadowsIndex == 1 ? (IsEnglish ? "on" : "вкл") : (IsEnglish ? "off" : "выкл"));
+    }
+
+    private void ApplyDynamicShadows()
+    {
+        bool enabled = dynamicShadowsIndex == 1;
+        QualitySettings.shadows = enabled ? ShadowQuality.All : ShadowQuality.Disable;
+
+        Light[] lights = UnityEngine.Object.FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        if (enabled)
+        {
+            for (int i = 0; i < lights.Length; i++)
+            {
+                Light l = lights[i];
+                if (l == null)
+                {
+                    continue;
+                }
+
+                if (cachedLightShadows.TryGetValue(l, out LightShadows prev))
+                {
+                    l.shadows = prev;
+                }
+                else if (l.shadows == LightShadows.None)
+                {
+                    // Fallback when no cached value exists.
+                    l.shadows = LightShadows.Soft;
+                }
+            }
+            return;
+        }
+
+        for (int i = 0; i < lights.Length; i++)
+        {
+            Light l = lights[i];
+            if (l == null)
+            {
+                continue;
+            }
+
+            if (!cachedLightShadows.ContainsKey(l))
+            {
+                cachedLightShadows[l] = l.shadows;
+            }
+
+            l.shadows = LightShadows.None;
+        }
     }
 
     private void OnBrightnessChanged(float value)
@@ -2139,6 +2206,9 @@ public class HoverQuestionSuffix : MonoBehaviour, IPointerEnterHandler, IPointer
         }
     }
 }
+
+
+
 
 
 

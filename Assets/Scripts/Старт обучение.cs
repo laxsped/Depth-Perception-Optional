@@ -32,6 +32,7 @@ public class StartupMovementTutorial : MonoBehaviour
     [Header("Flow")]
     [SerializeField] private float delayBeforeJumpPrompt = 10f;
     [SerializeField] private bool unlockRunOnTutorialComplete = false;
+    [SerializeField] private bool keepRunLockedForNextScene = true;
 
     [Header("Key Icons")]
     [SerializeField] private List<KeyIconEntry> keyIcons = new List<KeyIconEntry>();
@@ -90,7 +91,7 @@ public class StartupMovementTutorial : MonoBehaviour
             if (Input.GetKeyDown(GameInputBindings.JumpKey))
             {
                 step = TutorialStep.Done;
-                if (unlockRunOnTutorialComplete)
+                if (unlockRunOnTutorialComplete && !keepRunLockedForNextScene)
                 {
                     GameInputBindings.RunLocked = false;
                 }
@@ -106,7 +107,7 @@ public class StartupMovementTutorial : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (unlockRunOnTutorialComplete && step != TutorialStep.Done)
+        if (unlockRunOnTutorialComplete && !keepRunLockedForNextScene && step != TutorialStep.Done)
         {
             GameInputBindings.RunLocked = false;
         }
@@ -408,3 +409,5 @@ public class StartupMovementTutorial : MonoBehaviour
     }
 #endif
 }
+
+
